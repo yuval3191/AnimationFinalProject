@@ -12,7 +12,7 @@ void cg3d::AnimationVisitor::Run(Scene* _scene, Camera* camera)
 
 void cg3d::AnimationVisitor::Visit(Model* model)
 {
-	Eigen::MatrixX3f system = model->GetRotation();
+	Eigen::MatrixX3f system = model->GetRotation().transpose();
 	if (scene->isAnimate()) {
 		if (model->name == std::string("first")) {
 			model->TranslateInSystem(system, Eigen::Vector3f(0, 0, 0.01f));
