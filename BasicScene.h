@@ -1,8 +1,7 @@
 #pragma once
-#include "AutoMorphingModel.h"
+
 #include "Scene.h"
 
-#include <memory>
 #include <utility>
 
 class BasicScene : public cg3d::Scene
@@ -15,17 +14,19 @@ public:
     void ScrollCallback(cg3d::Viewport* viewport, int x, int y, int xoffset, int yoffset, bool dragging, int buttonState[]) override;
     void CursorPosCallback(cg3d::Viewport* viewport, int x, int y, bool dragging, int* buttonState)  override;
     void KeyCallback(cg3d::Viewport* viewport, int x, int y, int key, int scancode, int action, int mods) override;
-     Eigen::Vector3f GetSpherePos();
+    std::vector<std::shared_ptr<cg3d::Model>> cyls, axis;
+    int numOfCyl = 3;
+
 private:
     std::shared_ptr<Movable> root;
-    std::shared_ptr<cg3d::Model> sphere1 ,cube;
-    std::shared_ptr<cg3d::AutoMorphingModel> autoCube;
-    std::vector<std::shared_ptr<cg3d::Model>> cyls, axis;
+
     int pickedIndex = 0;
     int tipIndex = 0;
     Eigen::VectorXi EMAP;
-    Eigen::MatrixXi F,E,EF,EI;
+    Eigen::MatrixXi F, E, EF, EI;
     Eigen::VectorXi EQ;
-  // If an edge were collapsed, we'd collapse it to these points:
-    Eigen::MatrixXd V, C, N, T, points,edges,colors;
+    // If an edge were collapsed, we'd collapse it to these points:
+    Eigen::MatrixXd V, C, N, T, points, edges, colors;
+    std::shared_ptr<cg3d::Model> cube1, cube2, cylinder, sphere1, sphere2, cube, sp2;
+
 };
