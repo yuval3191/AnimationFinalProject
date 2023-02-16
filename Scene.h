@@ -38,7 +38,7 @@ public:
     virtual void Update(const Program& program, const Eigen::Matrix4f& proj, const Eigen::Matrix4f& view, const Eigen::Matrix4f& model);
 
     std::shared_ptr<Model> pickedModel;
-    std::shared_ptr<Camera> camera;
+    std::shared_ptr<Camera> camera, generalCamera, firstPersonCamera;
 
     virtual void MouseCallback(Viewport* viewport, int x, int y, int button, int action, int mods, int buttonState[]);
     virtual void ScrollCallback(Viewport* viewport, int x, int y, int xoffset, int yoffset, bool dragging, int buttonState[]);
@@ -48,9 +48,10 @@ public:
     virtual void ViewportSizeCallback(Viewport* viewport);
     virtual void AddViewportCallback(Viewport* viewport) {};
     bool isAnimate() { return animate; };
+    bool animate = false;
+
 
 protected:
-    bool animate = false;
     Renderer* renderer; // required for picking
     int xAtPress = -1, yAtPress = -1;
     float pickedModelDepth = 0;
