@@ -29,7 +29,7 @@ public:
     int currLevel = 1;
     float speed = 0.01;
     int lives = 3;
-    int numOfCyl = 1;
+    int numOfCyl = 3;
     int cylToMove;
     float scaleFactor = 1;
     void initAll();
@@ -38,7 +38,9 @@ public:
     Eigen::Vector3f GenerateRandomPoint(std::shared_ptr<cg3d::Camera> camera, float near1, float far1);
     std::vector<igl::AABB<Eigen::MatrixXd, 3>> collisionTrees;
     std::shared_ptr<cg3d::Model> cube1, cube2, cylinder, sphere, sphere2, cube, sp2;
-    std::shared_ptr<Movable> root;
+    //std::shared_ptr<Movable> root;
+    std::shared_ptr<Movable> generalRoot, root, fakeRoot;
+    //std::shared_ptr<cg3d::Model> root;
     int pickedIndex = 0;
     int tipIndex = 0;
     bool nextLevelFlag = false;
