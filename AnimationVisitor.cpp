@@ -53,7 +53,8 @@ void cg3d::AnimationVisitor::Visit(Model* model)
 					Vector3f end = getEndpoint(0, { 0,0,0.8f }, ourScene->cyls);
 					Vector3f start = getEndpoint(0, { 0,0,-0.8f }, ourScene->cyls);
 					Vector3f direction = (end - start).normalized();
-					model->TranslateInSystem(system, { 0,0,ourScene->speed });
+					//model->TranslateInSystem(system, { 0,0,ourScene->speed });
+					model->Translate(direction * ourScene->speed);
 				}
 			}
 		}
