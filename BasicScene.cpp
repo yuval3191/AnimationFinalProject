@@ -53,8 +53,8 @@ void BasicScene::Init(float fov, int width, int height, float near1, float far1)
     generalCamera->Translate(22, Axis::Z);
     firstPersonCamera = Camera::Create("", fov, double(width) / height, near1, far1);
     camera = generalCamera;
-
-    AddChild(root = Movable::Create("root")); // a common (invisible) parent object for all the shapes
+    
+    //AddChild(root = Movable::Create("root")); // a common (invisible) parent object for all the shapes
     auto daylight{ std::make_shared<Material>("daylight", "shaders/cubemapShader") };
     daylight->AddTexture(0, "textures/cubemaps/Daylight Box_", 3);
     auto background{ Model::Create("background", Mesh::Cube(), daylight) };
@@ -63,19 +63,33 @@ void BasicScene::Init(float fov, int width, int height, float near1, float far1)
     background->SetPickable(false);
     background->SetStatic();
 
-
     auto program = std::make_shared<Program>("shaders/phongShader");
-    auto program1 = std::make_shared<Program>("shaders/pickingShader");
+    program->name = "red";
+    auto program1 = std::make_shared<Program>("shaders/phongShader");
+    program1->name = "blue";
     auto program2 = std::make_shared<Program>("shaders/basicShader");
 
     material = std::make_shared<Material>("material", program); // empty material
-    material1 = std::make_shared<Material>("material1", program2); // empty material
+    material1 = std::make_shared<Material>("material1", program1); // empty material
     material1->AddTexture(0, "textures/box0.bmp", 2);
     //material->AddTexture(0, "textures/box0.bmp", 2);
     sphereMesh = IglLoader::MeshFromFiles("sphere_igl", "data/sphere.obj");
     cubeMesh = IglLoader::MeshFromFiles("cube_igl", "data/cube_old.obj");
     cylMesh = IglLoader::MeshFromFiles("cyl_igl","data/zcylinder.obj");
     //auto cubeMesh{ IglLoader::MeshFromFiles("cube_igl","data/cube_old.obj") };
+
+
+    /*adding new roots*/
+    // generalRoot = Model::Create("genRoot", cubeMesh, material);
+    generalRoot = Movable::Create("generalRoot");
+    //generalRoot->isHidden = true;
+    
+    root = Movable::Create("root");
+    //fakeRoot = Movable::Create("root");
+    root->AddChild(generalRoot);
+    AddChild(root);
+    generalRoot->AddChild(camera);
+    /*finish adding new roots*/
 
     //Axis
     Eigen::MatrixXd vertices(6, 3);
@@ -101,11 +115,11 @@ void BasicScene::Init(float fov, int width, int height, float near1, float far1)
     bigSphere->Scale(1.5f);
     bigSphere->showFaces = true;
     sphere->AddChild(bigSphere);*/
-    sphere->Scale(scaleFactor, Axis::Z);
+    /*sphere->Scale(scaleFactor, Axis::Z);
     sphere->SetTransform(Eigen::Matrix4f::Identity());
     auto point = GenerateRandomPoint(camera, 5, 35);
     sphere->Translate(point);
-    root->AddChild(sphere);
+    generalRoot->AddChild(sphere);*/
     initAll();
     initObjs(1);
 }
@@ -219,6 +233,21 @@ Eigen::Vector3f BasicScene::GenerateRandomPoint(std::shared_ptr<cg3d::Camera> ca
 void BasicScene::Update(const Program& program, const Eigen::Matrix4f& proj, const Eigen::Matrix4f& view, const Eigen::Matrix4f& model)
 {
     Scene::Update(program, proj, view, model);
+    if (strcmp(program.name.c_str(), "red") == 0)
+    {
+        program.SetUniform4f("lightColor", 0.8f, 0.3f, 0.0f, 0.5f);
+        program.SetUniform4f("Kai", 1.0f, 0.3f, 0.6f, 1.0f);
+        program.SetUniform4f("Kdi", 0.5f, 0.5f, 0.0f, 1.0f);
+        program.SetUniform1f("specular_exponent", 5.0f);
+        program.SetUniform4f("light_position", 0.0, 15.0f, 0.0, 1.0f);
+    }
+    else if (strcmp(program.name.c_str(), "blue") == 0) {
+        program.SetUniform4f("lightColor", 0.0f, 0.3f, 0.6f, 1.0f);
+        program.SetUniform4f("Kai", 0.0f, 0.5f, 1.0f, 1.0f);
+        program.SetUniform4f("Kdi", 0.2f, 0.2f, 0.5f, 1.0f);
+        program.SetUniform1f("specular_exponent", 10.0f);
+        program.SetUniform4f("light_position", 0.0, 15.0f, 0.0, 1.0f);
+    }
 
 }
 
@@ -507,7 +536,7 @@ void BasicScene::CursorPosCallback(Viewport* viewport, int x, int y, bool draggi
                     pickedModel->SetTout(otherPickedToutAtPress);
                 }
                 pickedModel->SetTout(pickedToutAtPress);
-                actuallyPicked->TranslateInSystem(system * root->GetRotation(), { float(x - xAtPress) / moveCoeff, float(yAtPress - y) / moveCoeff, 0 });
+                actuallyPicked->TranslateInSystem(system * generalRoot->GetRotation(), { float(x - xAtPress) / moveCoeff, float(yAtPress - y) / moveCoeff, 0 });
             }
         }
         else
@@ -515,8 +544,8 @@ void BasicScene::CursorPosCallback(Viewport* viewport, int x, int y, bool draggi
             camera->SetTout(cameraToutAtPress);
             if (buttonState[GLFW_MOUSE_BUTTON_LEFT] != GLFW_RELEASE)
             {
-                root->RotateInSystem(system, float(x - lastx) / angleCoeff * 3, Axis::Y);
-                root->RotateInSystem(system, float(y - lasty) / angleCoeff * 3, Axis::X);
+                generalRoot->RotateInSystem(system, float(x - lastx) / angleCoeff * 3, Axis::Y);
+                generalRoot->RotateInSystem(system, float(y - lasty) / angleCoeff * 3, Axis::X);
                 lastx = x;
                 lasty = y;
             }
@@ -526,7 +555,7 @@ void BasicScene::CursorPosCallback(Viewport* viewport, int x, int y, bool draggi
             }
             if (buttonState[GLFW_MOUSE_BUTTON_RIGHT] != GLFW_RELEASE)
             {
-                root->TranslateInSystem(system, { float(lastx - x) / moveCoeff * 0.2f, float(y - lasty) / moveCoeff * 0.2f, 0 });
+                generalRoot->TranslateInSystem(system, { float(lastx - x) / moveCoeff * 0.2f, float(y - lasty) / moveCoeff * 0.2f, 0 });
                 lastx = x;
                 lasty = y;
             }
